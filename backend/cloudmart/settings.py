@@ -13,6 +13,11 @@ SECRET_KEY = config('DJANGO_SECRET_KEY')
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,backend').split(',')
+# Always include localhost/127.0.0.1 for Docker health-checks and internal probes
+_extra_hosts = ['localhost', '127.0.0.1', 'backend']
+for _h in _extra_hosts:
+    if _h not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(_h)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -139,12 +144,26 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-# CORS
+# CORS — allow the frontend origin(s).
+# The Next.js frontend proxies API calls server-side, so browser-originated
+# CORS requests only happen when the frontend is accessed from an external IP.
+# Accept both the EC2 public URL and localhost for local dev.
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
     default='http://localhost:3000,http://127.0.0.1:3000'
 ).split(',')
+
+# Strip any accidental whitespace from the list
+CORS_ALLOWED_ORIGINS = [o.strip() for o in CORS_ALLOWED_ORIGINS if o.strip()]
+
 CORS_ALLOW_CREDENTIALS = True
+
+# CSRF — accept form posts from the frontend
+CSRF_TRUSTED_ORIGINS = config(
+    'CSRF_TRUSTED_ORIGINS',
+    default='http://localhost:3000,http://127.0.0.1:3000'
+).split(',')
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in CSRF_TRUSTED_ORIGINS if o.strip()]
 
 # Environment
 ENVIRONMENT = config('ENVIRONMENT', default='development')

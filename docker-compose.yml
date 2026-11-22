@@ -27,19 +27,25 @@ services:
       DB_USER: cloudmart
       DB_PASSWORD: ${DB_PASSWORD}
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
-      DJANGO_DEBUG: "False"
-      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,backend
-      CORS_ALLOWED_ORIGINS: http://localhost:3000
-      CSRF_TRUSTED_ORIGINS: http://localhost:3000
+      DEBUG: "True"
+      ALLOWED_HOSTS: "localhost,127.0.0.1,backend,13.232.83.176"
+      CORS_ALLOWED_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000,http://13.232.83.176:3000"
+      CSRF_TRUSTED_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000,http://13.232.83.176:3000"
     depends_on:
       db:
         condition: service_healthy
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        BACKEND_INTERNAL_URL: http://backend:8000
     restart: unless-stopped
     ports:
       - "3000:3000"
+    environment:
+      BACKEND_INTERNAL_URL: http://backend:8000
+      HOSTNAME: "0.0.0.0"
     depends_on:
       - backend
 

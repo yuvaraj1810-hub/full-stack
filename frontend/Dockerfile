@@ -15,6 +15,10 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Build-time arg so next.config.js rewrites resolve to backend service
+ARG BACKEND_INTERNAL_URL=http://backend:8000
+ENV BACKEND_INTERNAL_URL=$BACKEND_INTERNAL_URL
+
 RUN npm run build
 
 FROM node:22-alpine AS runner

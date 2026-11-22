@@ -16,5 +16,5 @@ urlpatterns = [
     path('api/v1/', include('apps.admin_panel.urls')),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Always serve media files (they are proxied through Next.js in production)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

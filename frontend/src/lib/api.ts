@@ -1,6 +1,12 @@
 import axios from 'axios'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+// In the browser we always use relative URLs so requests go through the
+// Next.js reverse-proxy rewrite (/api/v1/* → http://backend:8000/api/v1/*).
+// On the server side (SSR) we can call the backend directly.
+const API_URL =
+  typeof window === 'undefined'
+    ? (process.env.BACKEND_INTERNAL_URL || 'http://backend:8000')
+    : ''
 
 export const api = axios.create({
   baseURL: `${API_URL}/api/v1`,
@@ -53,6 +59,14 @@ export const formatINR = (paise: number): string => {
 
 export const getImageUrl = (path: string | null | undefined): string => {
   if (!path) return '/placeholder-product.svg'
-  if (path.startsWith('http')) return path
-  return `${API_URL}${path}`
+  if (path.startsWith('http')) {
+    // Strip any absolute backend origin so the image is served via the proxy
+    try {
+      const url = new URL(path)
+      return url.pathname
+    } catch {
+      return path
+    }
+  }
+  return path
 }
