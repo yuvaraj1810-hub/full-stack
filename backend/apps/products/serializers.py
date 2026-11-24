@@ -1,14 +1,34 @@
+from urllib.parse import urlparse
 from rest_framework import serializers
 from .models import Category, Product, ProductVariant, ProductImage, Inventory, InventoryMovement
 
 
+class RelativeImageField(serializers.ImageField):
+    """ImageField that ensures image URLs are returned as clean root-relative paths
+    (e.g., /media/...) instead of internal Docker URLs (http://backend:8000/media/...)."""
+    def to_representation(self, value):
+        if not value:
+            return None
+        try:
+            url = value.url
+            if url.startswith('http://') or url.startswith('https://'):
+                return urlparse(url).path
+            return url
+        except AttributeError:
+            return None
+
+
 class CategorySerializer(serializers.ModelSerializer):
+    image = RelativeImageField(required=False, allow_null=True)
+
     class Meta:
         model = Category
         fields = ['id', 'name', 'slug', 'description', 'image', 'parent', 'is_active']
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
+    image = RelativeImageField()
+
     class Meta:
         model = ProductImage
         fields = ['id', 'image', 'alt_text', 'is_primary', 'sort_order']
@@ -44,7 +64,12 @@ class ProductVariantSerializer(serializers.ModelSerializer):
     def get_product_image(self, obj):
         try:
             img = obj.product.images.filter(is_primary=True).first() or obj.product.images.first()
-            return img.image.url if img and img.image else None
+            if img and img.image:
+                url = img.image.url
+                if url.startswith('http://') or url.startswith('https://'):
+                    return urlparse(url).path
+                return url
+            return None
         except Exception:
             return None
 

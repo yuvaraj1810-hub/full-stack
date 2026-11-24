@@ -112,6 +112,10 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+import mimetypes
+mimetypes.add_type('image/webp', '.webp')
+mimetypes.add_type('image/svg+xml', '.svg')
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # REST Framework

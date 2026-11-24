@@ -273,15 +273,16 @@ export default function HomePage() {
                 const price = product.min_price || primaryVariant?.price_paise || 0
                 const available = primaryVariant?.inventory?.available_quantity ?? 0
                 const isInStock = available > 0
+                const imageSrc = product.primary_image?.image || product.images?.[0]?.image
 
                 return (
                   <div key={product.id} className="card overflow-hidden group hover:shadow-md transition-shadow flex flex-col justify-between">
                     <div>
                       {/* Product Image / Placeholder */}
                       <div className="h-48 bg-gray-100 dark:bg-gray-800 relative flex items-center justify-center overflow-hidden">
-                        {product.primary_image ? (
+                        {imageSrc ? (
                           <img 
-                            src={getImageUrl(product.primary_image.image)} 
+                            src={getImageUrl(imageSrc)} 
                             alt={product.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
@@ -382,14 +383,15 @@ export default function HomePage() {
                 const price = product.min_price || primaryVariant?.price_paise || 0
                 const available = primaryVariant?.inventory?.available_quantity ?? 0
                 const isInStock = available > 0
+                const imageSrc = product.primary_image?.image || product.images?.[0]?.image
 
                 return (
                   <div key={product.id} className="card overflow-hidden group hover:shadow-md transition-shadow flex flex-col justify-between">
                     <div>
                       <div className="h-44 bg-gray-100 dark:bg-gray-800 relative flex items-center justify-center overflow-hidden">
-                        {product.primary_image ? (
+                        {imageSrc ? (
                           <img 
-                            src={getImageUrl(product.primary_image.image)} 
+                            src={getImageUrl(imageSrc)} 
                             alt={product.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />

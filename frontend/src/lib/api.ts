@@ -10,7 +10,11 @@ const API_URL =
 
 export const api = axios.create({
   baseURL: `${API_URL}/api/v1`,
-  headers: { 'Content-Type': 'application/json' },
+  headers: {
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache',
+  },
   withCredentials: false,
 })
 

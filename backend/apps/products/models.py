@@ -53,7 +53,7 @@ class Product(models.Model):
 
     @property
     def primary_image(self):
-        return self.images.filter(is_primary=True).first()
+        return self.images.filter(is_primary=True).first() or self.images.first()
 
     @property
     def min_price(self):

@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { api, formatINR } from '@/lib/api'
+import { api, formatINR, getImageUrl } from '@/lib/api'
 import { Product } from '@/types'
 import Link from 'next/link'
 import { Plus, Search, Eye, Pencil, Trash2, AlertCircle, Package } from 'lucide-react'
@@ -90,13 +90,16 @@ export default function AdminProductsPage() {
                   <tr key={product.id} className="hover:bg-gray-800/50 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        {product.primary_image ? (
-                          <img src={product.primary_image.image} alt={product.name} className="w-10 h-10 rounded-lg object-cover" />
-                        ) : (
-                          <div className="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center text-gray-500">
-                            <AlertCircle size={16} />
-                          </div>
-                        )}
+                        {(() => {
+                          const imgUrl = product.primary_image?.image || product.images?.[0]?.image
+                          return imgUrl ? (
+                            <img src={getImageUrl(imgUrl)} alt={product.name} className="w-10 h-10 rounded-lg object-cover" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center text-gray-500">
+                              <AlertCircle size={16} />
+                            </div>
+                          )
+                        })()}
                         <div>
                           <p className="font-medium text-white">{product.name}</p>
                           <p className="text-xs text-gray-500">{product.slug}</p>
