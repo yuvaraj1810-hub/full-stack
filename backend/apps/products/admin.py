@@ -230,6 +230,44 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ("name", "slug")
     prepopulated_fields = {"slug": ("name",)}
 
+    actions = ["fetch_missing_images"]
+
+    @admin.action(description="Fetch and associate missing product images")
+    def fetch_missing_images(self, request, queryset):
+        from .image_service import get_providers, product_needs_image, save_candidate_to_product
+        from django.contrib import messages
+
+        providers = get_providers(provider_name='auto')
+        updated = 0
+        skipped = 0
+        failed = 0
+
+        for product in queryset:
+            if not product_needs_image(product):
+                skipped += 1
+                continue
+
+            candidate = None
+            for provider in providers:
+                candidate = provider.search_image(product)
+                if candidate:
+                    break
+
+            if candidate:
+                success, msg, _ = save_candidate_to_product(product, candidate, dry_run=False)
+                if success:
+                    updated += 1
+                else:
+                    failed += 1
+            else:
+                failed += 1
+
+        self.message_user(
+            request,
+            f"Image fetch complete: {updated} product(s) updated with new images, {skipped} already had images, {failed} need manual review.",
+            messages.SUCCESS if updated > 0 else messages.WARNING,
+        )
+
     inlines = [
         ProductVariantInline,
         ProductImageInline,
