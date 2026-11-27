@@ -63,11 +63,11 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-[var(--cm-surface)] border-b border-[var(--cm-line)]">
       {/* Main Bar */}
-      <div className="cm-container py-3.5 flex flex-wrap md:flex-nowrap items-center gap-3 md:gap-6">
+      <div className="cm-container-full py-3 flex flex-wrap lg:flex-nowrap items-center gap-3 lg:gap-5">
         {/* Brand Wordmark */}
         <Link
           href="/"
-          className="text-[1.75rem] font-extrabold tracking-[-0.065em] text-[var(--cm-ink)] shrink-0 no-underline hover:no-underline"
+          className="text-[1.5rem] sm:text-[1.75rem] font-extrabold tracking-[-0.065em] text-[var(--cm-ink)] shrink-0 no-underline hover:no-underline"
         >
           Cloud<span className="text-[var(--cm-link)]">Mart</span>
         </Link>
@@ -76,7 +76,7 @@ export default function Navbar() {
         <form
           role="search"
           onSubmit={handleSearch}
-          className="flex flex-1 order-3 md:order-none basis-full md:basis-auto min-w-0"
+          className="flex flex-1 order-3 lg:order-none basis-full lg:basis-auto min-w-0"
         >
           <input
             type="search"
@@ -84,18 +84,18 @@ export default function Navbar() {
             placeholder="Search electronics and accessories"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full min-w-0 px-3.5 py-2.5 bg-[var(--cm-surface)] text-[var(--cm-ink)] border border-[var(--cm-line)] rounded-l-lg text-sm focus:outline-none"
+            className="w-full min-w-0 px-3 py-2 sm:px-3.5 sm:py-2.5 bg-[var(--cm-surface)] text-[var(--cm-ink)] border border-[var(--cm-line)] rounded-l-lg text-sm focus:outline-none"
           />
           <button
             type="submit"
-            className="px-4 py-2.5 bg-[var(--cm-blue)] text-white font-semibold text-sm rounded-r-lg shrink-0 hover:opacity-90 transition-opacity cursor-pointer"
+            className="px-3.5 sm:px-4 py-2 sm:py-2.5 bg-[var(--cm-blue)] text-white font-semibold text-sm rounded-r-lg shrink-0 hover:opacity-90 transition-opacity cursor-pointer"
           >
             Search
           </button>
         </form>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-4 shrink-0 text-sm font-semibold">
+        {/* Laptop & Desktop Nav */}
+        <nav className="hidden lg:flex items-center gap-4 shrink-0 text-sm font-semibold whitespace-nowrap">
           <Link href="/products" className="text-[var(--cm-ink)] hover:text-[var(--cm-link)]">
             Products
           </Link>
@@ -107,11 +107,6 @@ export default function Navbar() {
               <Link href="/cart" className="text-[var(--cm-ink)] hover:text-[var(--cm-link)]">
                 Cart ({cartCount})
               </Link>
-              {user?.is_staff && (
-                <Link href="/admin" className="text-[var(--cm-ink)] hover:text-[var(--cm-link)]">
-                  Admin
-                </Link>
-              )}
               <Link href="/account" className="text-[var(--cm-link)] max-w-[110px] truncate">
                 {user?.first_name || user?.email}
               </Link>
@@ -142,9 +137,9 @@ export default function Navbar() {
           </button>
         </nav>
 
-        {/* Mobile Controls */}
-        <div className="flex md:hidden items-center gap-2 ml-auto">
-          <Link href="/cart" className="text-xs font-semibold text-[var(--cm-ink)] px-2 py-1.5">
+        {/* Mobile & Tablet Controls */}
+        <div className="flex lg:hidden items-center gap-2 ml-auto shrink-0">
+          <Link href="/cart" className="text-xs sm:text-sm font-semibold text-[var(--cm-ink)] px-2 py-1.5 whitespace-nowrap">
             Cart ({cartCount})
           </Link>
           <button
@@ -168,7 +163,7 @@ export default function Navbar() {
       {/* Category Sub-Bar */}
       <nav
         aria-label="Product categories"
-        className="cm-container pt-1 pb-3 flex items-center gap-4 overflow-x-auto whitespace-nowrap text-sm font-semibold"
+        className="cm-container-full pt-1 pb-2.5 flex items-center gap-4 overflow-x-auto no-scrollbar whitespace-nowrap text-xs sm:text-sm font-semibold"
       >
         <Link href="/products" className="text-[var(--cm-ink)] hover:text-[var(--cm-link)]">
           All categories
@@ -184,9 +179,9 @@ export default function Navbar() {
         ))}
       </nav>
 
-      {/* Mobile Dropdown */}
+      {/* Mobile & Tablet Dropdown */}
       {menuOpen && (
-        <div className="md:hidden border-t border-[var(--cm-line)] bg-[var(--cm-surface)] px-4 py-3 space-y-2 text-sm font-semibold">
+        <div className="lg:hidden border-t border-[var(--cm-line)] bg-[var(--cm-surface)] px-4 py-3 space-y-2 text-sm font-semibold">
           <Link href="/products" className="block py-1.5 text-[var(--cm-ink)]" onClick={() => setMenuOpen(false)}>
             Products
           </Link>
@@ -198,11 +193,6 @@ export default function Navbar() {
               <Link href="/account" className="block py-1.5 text-[var(--cm-ink)]" onClick={() => setMenuOpen(false)}>
                 Account
               </Link>
-              {user?.is_staff && (
-                <Link href="/admin" className="block py-1.5 text-[var(--cm-ink)]" onClick={() => setMenuOpen(false)}>
-                  Admin
-                </Link>
-              )}
               <button
                 type="button"
                 onClick={() => {

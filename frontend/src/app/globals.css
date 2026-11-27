@@ -138,7 +138,20 @@
     max-width: 1250px;
     margin-left: auto;
     margin-right: auto;
-    padding-left: clamp(16px, 3vw, 40px);
-    padding-right: clamp(16px, 3vw, 40px);
+    padding-left: clamp(14px, 3vw, 36px);
+    padding-right: clamp(14px, 3vw, 36px);
+  }
+  .cm-container-full {
+    width: 100%;
+    max-width: 100%;
+    padding-left: clamp(14px, 2.5vw, 36px);
+    padding-right: clamp(14px, 2.5vw, 36px);
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

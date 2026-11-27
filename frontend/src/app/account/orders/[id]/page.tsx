@@ -94,14 +94,14 @@ export default function OrderDetailPage() {
 
           {/* Horizontal Progress Track matching CloudMart.module.css (.track) */}
           {order.status !== 'CANCELLED' && (
-            <ol className="flex list-none p-0 gap-2 my-4">
+            <ol className="flex list-none p-0 gap-1 sm:gap-2 my-4 overflow-x-auto no-scrollbar">
               {TRACK_STEPS.map((step, i) => {
                 const done = activeStepIdx >= 0 && i <= activeStepIdx
                 return (
                   <li
                     key={step}
                     data-done={done}
-                    className={`flex-1 pt-2.5 border-t-4 text-xs sm:text-sm font-semibold ${
+                    className={`flex-1 min-w-[60px] pt-2.5 border-t-4 text-[10px] sm:text-xs md:text-sm font-semibold ${
                       done
                         ? 'border-[var(--cm-blue)] text-[var(--cm-link)]'
                         : 'border-[var(--cm-line)] text-[var(--cm-muted)]'

@@ -47,7 +47,7 @@ api.interceptors.response.use(
       } catch {
         localStorage.removeItem('access_token')
         localStorage.removeItem('refresh_token')
-        if (typeof window !== 'undefined') window.location.href = '/login'
+        if (typeof window !== 'undefined') window.location.href = '/user/login'
       }
     }
     return Promise.reject(error)
@@ -62,7 +62,7 @@ export const formatINR = (paise: number): string => {
 }
 
 export const getImageUrl = (path: string | null | undefined): string => {
-  if (!path) return '/placeholder-product.svg'
+  if (!path) return '/user/placeholder-product.svg'
   if (path.startsWith('http')) {
     // Strip any absolute backend origin so the image is served via the proxy
     try {

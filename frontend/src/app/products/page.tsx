@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { api, formatINR, getImageUrl } from '@/lib/api'
@@ -133,8 +134,8 @@ function ProductsCatalog() {
       </h1>
 
       {/* Filters Bar */}
-      <div className="flex flex-wrap items-end gap-4 mb-6">
-        <label className="flex-1 min-w-[160px] grid gap-1.5 text-sm font-semibold text-[var(--cm-ink)]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 items-end mb-6">
+        <label className="grid gap-1.5 text-sm font-semibold text-[var(--cm-ink)]">
           <span>Sort by</span>
           <select
             value={sortBy}
@@ -147,7 +148,7 @@ function ProductsCatalog() {
           </select>
         </label>
 
-        <label className="flex-1 min-w-[160px] grid gap-1.5 text-sm font-semibold text-[var(--cm-ink)]">
+        <label className="grid gap-1.5 text-sm font-semibold text-[var(--cm-ink)]">
           <span>Maximum price (₹)</span>
           <input
             type="number"
@@ -159,7 +160,7 @@ function ProductsCatalog() {
           />
         </label>
 
-        <label className="flex-1 min-w-[160px] grid gap-1.5 text-sm font-semibold text-[var(--cm-ink)]">
+        <label className="grid gap-1.5 text-sm font-semibold text-[var(--cm-ink)]">
           <span>Category</span>
           <select
             value={selectedCategory ?? ''}
@@ -188,7 +189,7 @@ function ProductsCatalog() {
 
       {/* Product Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-[18px]">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-[18px]">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="card p-3.5 animate-pulse flex flex-col gap-2">
               <div className="w-full aspect-[1.55] bg-[var(--cm-tint)] rounded-[9px]" />
@@ -227,7 +228,7 @@ function ProductsCatalog() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-[18px]">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-[18px]">
           {products.map((product) => {
             const primaryVariant = product.variants?.[0]
             const availableStock = primaryVariant?.inventory?.available_quantity ?? 0
@@ -236,28 +237,28 @@ function ProductsCatalog() {
             const imageSrc = product.primary_image?.image || product.images?.[0]?.image
 
             return (
-              <article key={product.id} className="card p-3 sm:p-3.5 flex flex-col gap-2">
-                <div>
+              <article key={product.id} className="card p-2.5 sm:p-3.5 flex flex-col gap-2 min-w-0">
+                <Link href={`/products/${product.slug}`} className="block group no-underline min-w-0">
                   {imageSrc ? (
                     <img
                       src={getImageUrl(imageSrc)}
                       alt={product.name}
-                      className="w-full aspect-[1.55] object-contain bg-white rounded-[9px] block"
+                      className="w-full aspect-[1.55] object-contain bg-white rounded-[9px] block p-1"
                     />
                   ) : (
                     <span className="w-full aspect-[1.55] grid place-items-center bg-[var(--cm-tint)] text-[var(--cm-muted)] rounded-[9px] text-xs font-medium px-2 text-center">
                       {product.category_name}
                     </span>
                   )}
-                  <small className="block text-xs text-[var(--cm-muted)] mt-3">
+                  <small className="block text-[11px] sm:text-xs text-[var(--cm-muted)] mt-2.5 truncate">
                     {product.category_name}
                   </small>
-                  <h3 className="text-base font-bold text-[var(--cm-ink)] mt-1 line-clamp-1">
+                  <h3 className="text-sm sm:text-base font-bold text-[var(--cm-ink)] mt-1 line-clamp-1 group-hover:underline">
                     {product.name}
                   </h3>
-                </div>
+                </Link>
 
-                <strong className="text-base font-bold text-[var(--cm-ink)]">
+                <strong className="text-sm sm:text-base font-bold text-[var(--cm-ink)]">
                   {formatINR(price)}
                 </strong>
 
@@ -265,7 +266,7 @@ function ProductsCatalog() {
                   type="button"
                   disabled={!inStock || addingVariantId === primaryVariant?.id}
                   onClick={() => handleAddToCart(product)}
-                  className="btn-primary w-full text-sm mt-auto py-2.5"
+                  className="btn-primary w-full text-xs sm:text-sm mt-auto py-2 sm:py-2.5"
                 >
                   {addingVariantId === primaryVariant?.id
                     ? 'Adding…'

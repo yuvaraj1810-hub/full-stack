@@ -72,6 +72,68 @@ class CategoryListView(generics.ListAPIView):
     queryset = Category.objects.filter(is_active=True)
 
 
+class AdminCategoryListCreateView(APIView):
+    """GET / POST /api/v1/admin/categories/"""
+    permission_classes = [IsAdminOrStaff]
+
+    def get(self, request):
+        cats = Category.objects.all().order_by('name')
+        return Response({'results': CategorySerializer(cats, many=True).data})
+
+    def post(self, request):
+        name = (request.data.get('name') or '').strip()
+        if not name:
+            return Response({'detail': 'Category name is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        if Category.objects.filter(name__iexact=name).exists():
+            return Response({'detail': f"Category '{name}' already exists."}, status=status.HTTP_400_BAD_REQUEST)
+
+        base_slug = slugify(name) or 'category'
+        slug = base_slug
+        if Category.objects.filter(slug=slug).exists():
+            slug = f"{base_slug}-{get_random_string(4).lower()}"
+
+        cat = Category.objects.create(
+            name=name,
+            slug=slug,
+            description=(request.data.get('description') or '').strip(),
+            is_active=request.data.get('is_active', True),
+        )
+        return Response(CategorySerializer(cat).data, status=status.HTTP_201_CREATED)
+
+
+class AdminCategoryDetailView(APIView):
+    """PATCH / DELETE /api/v1/admin/categories/<int:pk>/"""
+    permission_classes = [IsAdminOrStaff]
+
+    def patch(self, request, pk):
+        try:
+            cat = Category.objects.get(pk=pk)
+        except Category.DoesNotExist:
+            return Response({'detail': 'Category not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if 'name' in request.data and request.data['name'].strip():
+            cat.name = request.data['name'].strip()
+        if 'description' in request.data:
+            cat.description = request.data['description'].strip()
+        if 'is_active' in request.data:
+            cat.is_active = bool(request.data['is_active'])
+        cat.save()
+        return Response(CategorySerializer(cat).data)
+
+    def delete(self, request, pk):
+        try:
+            cat = Category.objects.get(pk=pk)
+        except Category.DoesNotExist:
+            return Response({'detail': 'Category not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if cat.products.exists():
+            cat.is_active = False
+            cat.save(update_fields=['is_active', 'updated_at'])
+            return Response({'message': f"Category '{cat.name}' deactivated (has linked products)."})
+        cat.delete()
+        return Response({'message': f"Category '{cat.name}' deleted."})
+
+
 # ─── ADMIN PRODUCT ENDPOINTS ──────────────────────────────────────────────────
 
 class AdminProductListCreateView(APIView):

@@ -112,28 +112,28 @@ export default function HomePage() {
                       key={product.id}
                       className="w-full shrink-0 grid grid-cols-1 md:grid-cols-2 items-center"
                     >
-                      <div className="p-6 sm:p-10 lg:p-14 pb-12 sm:pb-14">
-                        <small className="block text-sm font-semibold text-[#394d65]">
+                      <div className="px-12 py-6 sm:px-14 sm:py-10 lg:px-16 lg:py-12 pb-12 sm:pb-14 min-w-0">
+                        <small className="block text-xs sm:text-sm font-semibold text-[#394d65]">
                           {product.category_name} · {formatINR(price)}
                         </small>
-                        <h1 className="text-[clamp(1.85rem,4vw,3.1rem)] font-extrabold text-[#132242] leading-[1.12] tracking-[-0.035em] my-4 line-clamp-2">
+                        <h1 className="text-[clamp(1.5rem,3.6vw,3rem)] font-extrabold text-[#132242] leading-[1.12] tracking-[-0.035em] my-3 sm:my-4 line-clamp-2">
                           {product.name}
                         </h1>
-                        <p className="text-[#394d65] text-sm sm:text-base mb-6 max-w-md line-clamp-2">
+                        <p className="text-[#394d65] text-xs sm:text-base mb-5 sm:mb-6 max-w-md line-clamp-2">
                           {product.description || 'Discover top-rated electronics, apparel, lifestyle essentials and more with instant UPI & COD checkout.'}
                         </p>
                         <Link
-                          href={`/products?search=${encodeURIComponent(product.name)}`}
-                          className="btn-primary text-sm px-5 py-2.5 inline-flex items-center gap-1.5 no-underline"
+                          href={`/products/${product.slug}`}
+                          className="btn-primary text-xs sm:text-sm px-4 sm:px-5 py-2 sm:py-2.5 inline-flex items-center gap-1.5 no-underline"
                         >
                           View product →
                         </Link>
                       </div>
                       <img
-                        src={slideImg ? getImageUrl(slideImg) : '/cloudmart-images/hero.webp'}
+                        src={slideImg ? getImageUrl(slideImg) : '/user/cloudmart-images/hero.webp'}
                         alt={product.name}
-                        className={`w-full h-[180px] sm:h-[260px] md:h-[335px] block ${
-                          slideImg ? 'object-contain bg-white/70 p-4' : 'object-cover'
+                        className={`w-full h-[200px] sm:h-[260px] md:h-[310px] lg:h-[340px] block ${
+                          slideImg ? 'object-contain bg-white/75 p-4' : 'object-cover'
                         }`}
                       />
                     </div>
@@ -195,7 +195,7 @@ export default function HomePage() {
                 </Link>
               </div>
               <img
-                src="/cloudmart-images/hero.webp"
+                src="/user/cloudmart-images/hero.webp"
                 alt="CloudMart Featured"
                 className="w-full h-[180px] sm:h-[260px] md:h-[335px] object-cover block"
               />
@@ -215,7 +215,7 @@ export default function HomePage() {
 
         {/* Products */}
         {productsLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-[18px]">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-[18px]">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="card p-3.5 animate-pulse flex flex-col gap-2">
                 <div className="w-full aspect-[1.55] bg-[var(--cm-tint)] rounded-[9px]" />
@@ -236,7 +236,7 @@ export default function HomePage() {
             <p className="text-[var(--cm-muted)]">No matching products found in the catalog.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-[18px]">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-[18px]">
             {products.map((product) => {
               const primaryVariant = product.variants?.[0]
               const price = product.min_price || primaryVariant?.price_paise || 0
@@ -247,29 +247,29 @@ export default function HomePage() {
               return (
                 <article
                   key={product.id}
-                  className="card p-3 sm:p-3.5 flex flex-col gap-2"
+                  className="card p-2.5 sm:p-3.5 flex flex-col gap-2 min-w-0"
                 >
-                  <Link href={`/products?search=${encodeURIComponent(product.name)}`} className="block group no-underline">
+                  <Link href={`/products/${product.slug}`} className="block group no-underline min-w-0">
                     {imageSrc ? (
                       <img
                         src={getImageUrl(imageSrc)}
                         alt={product.name}
-                        className="w-full aspect-[1.55] object-contain bg-white rounded-[9px] block"
+                        className="w-full aspect-[1.55] object-contain bg-white rounded-[9px] block p-1"
                       />
                     ) : (
                       <span className="w-full aspect-[1.55] grid place-items-center bg-[var(--cm-tint)] text-[var(--cm-muted)] rounded-[9px] text-xs font-medium px-2 text-center">
                         {product.category_name}
                       </span>
                     )}
-                    <small className="block text-xs text-[var(--cm-muted)] mt-3">
+                    <small className="block text-[11px] sm:text-xs text-[var(--cm-muted)] mt-2.5 truncate">
                       {product.category_name}
                     </small>
-                    <h3 className="text-base font-bold text-[var(--cm-ink)] mt-1 line-clamp-1 group-hover:underline">
+                    <h3 className="text-sm sm:text-base font-bold text-[var(--cm-ink)] mt-1 line-clamp-1 group-hover:underline">
                       {product.name}
                     </h3>
                   </Link>
 
-                  <strong className="text-base font-bold text-[var(--cm-ink)]">
+                  <strong className="text-sm sm:text-base font-bold text-[var(--cm-ink)]">
                     {formatINR(price)}
                   </strong>
 
@@ -277,7 +277,7 @@ export default function HomePage() {
                     type="button"
                     disabled={!isInStock || addingId === product.id}
                     onClick={() => handleQuickAddToCart(product)}
-                    className="btn-primary w-full text-sm mt-auto py-2.5"
+                    className="btn-primary w-full text-xs sm:text-sm mt-auto py-2 sm:py-2.5"
                   >
                     {addingId === product.id
                       ? 'Adding…'

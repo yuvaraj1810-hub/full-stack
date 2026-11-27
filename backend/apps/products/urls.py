@@ -11,6 +11,10 @@ urlpatterns = [
     path('categories/', views.CategoryListView.as_view(), name='categories'),
 
     # Admin
+    path('admin/categories', views.AdminCategoryListCreateView.as_view()),
+    path('admin/categories/', views.AdminCategoryListCreateView.as_view(), name='admin-categories'),
+    path('admin/categories/<int:pk>', views.AdminCategoryDetailView.as_view()),
+    path('admin/categories/<int:pk>/', views.AdminCategoryDetailView.as_view(), name='admin-category-detail'),
     path('admin/products', views.AdminProductListCreateView.as_view()),
     path('admin/products/', views.AdminProductListCreateView.as_view(), name='admin-products'),
     path('admin/products/<int:pk>', views.AdminProductDetailView.as_view()),

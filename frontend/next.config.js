@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 
 const nextConfig = {
+  basePath: '/user',
   output: 'standalone',
 
   skipTrailingSlashRedirect: true,

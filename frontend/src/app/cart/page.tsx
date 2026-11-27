@@ -121,7 +121,7 @@ export default function CartPage() {
                   const itemImage = variant.product_image || variant.product?.primary_image?.image
 
                   return (
-                    <article key={item.id} className="flex items-center gap-4 py-4 first:pt-0 last:pb-0">
+                    <article key={item.id} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 py-4 first:pt-0 last:pb-0">
                       {itemImage ? (
                         <img
                           src={getImageUrl(itemImage)}
@@ -136,7 +136,7 @@ export default function CartPage() {
 
                       <div className="flex-1 min-w-0">
                         <Link
-                          href={`/products?search=${encodeURIComponent(variant.product_name || variant.sku)}`}
+                          href={variant.product_slug ? `/products/${variant.product_slug}` : `/products?search=${encodeURIComponent(variant.product_name || variant.sku)}`}
                           className="font-semibold text-[var(--cm-link)] hover:underline block truncate"
                         >
                           {variant.product_name || `SKU: ${variant.sku}`}
