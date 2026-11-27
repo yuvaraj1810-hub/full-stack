@@ -1,8 +1,22 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import Address
 
 User = get_user_model()
+
+
+class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """Case-insensitive email authentication for JWT login."""
+
+    def validate(self, attrs):
+        email = (attrs.get(self.username_field) or '').strip().lower()
+        user = User.objects.filter(email__iexact=email).first()
+        if user is not None:
+            attrs[self.username_field] = user.email
+        else:
+            attrs[self.username_field] = email
+        return super().validate(attrs)
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -12,6 +26,18 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'email', 'username', 'first_name', 'last_name', 'phone', 'password', 'confirm_password']
+
+    def validate_email(self, value):
+        email = value.strip().lower()
+        if User.objects.filter(email__iexact=email).exists():
+            raise serializers.ValidationError('A user with this email already exists.')
+        return email
+
+    def validate_username(self, value):
+        username = value.strip().lower()
+        if User.objects.filter(username__iexact=username).exists():
+            raise serializers.ValidationError('A user with this username already exists.')
+        return username
 
     def validate(self, data):
         if data['password'] != data.pop('confirm_password'):

@@ -28,7 +28,7 @@ function LoginForm() {
     setErrorMessage(null)
     setCaptchaError(null)
 
-    const trimmedEmail = email.trim()
+    const trimmedEmail = email.trim().toLowerCase()
     if (!trimmedEmail || !password) {
       setErrorMessage('Please enter both email and password.')
       return

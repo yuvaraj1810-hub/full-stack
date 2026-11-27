@@ -7,7 +7,12 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import Address
-from .serializers import UserRegistrationSerializer, UserSerializer, AddressSerializer
+from .serializers import (
+    EmailTokenObtainPairSerializer,
+    UserRegistrationSerializer,
+    UserSerializer,
+    AddressSerializer,
+)
 
 User = get_user_model()
 
@@ -38,6 +43,7 @@ class RegisterView(generics.CreateAPIView):
 
 class LoginView(TokenObtainPairView):
     """POST /api/v1/auth/login/ — returns JWT tokens"""
+    serializer_class = EmailTokenObtainPairSerializer
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):

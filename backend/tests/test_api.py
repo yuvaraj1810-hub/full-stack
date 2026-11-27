@@ -382,3 +382,58 @@ def test_invalid_status_transition_rejected(customer_with_cart_and_address, admi
         'status': 'SHIPPED',
     }, format='json')
     assert update_res.status_code == 400
+
+
+@pytest.mark.django_db
+def test_gmail_signup_persists_and_login_fetches_from_db():
+    """Signing up with Gmail stores user in DB; logging in (even mixed-case) authenticates from DB."""
+    client = APIClient()
+    reg_res = client.post('/api/v1/auth/register/', {
+        'username': 'TestGmailUser',
+        'email': 'TestUser.One@Gmail.com',
+        'first_name': 'Test',
+        'last_name': 'User',
+        'phone': '9876543210',
+        'password': 'Password@123',
+        'confirm_password': 'Password@123',
+    }, format='json')
+    assert reg_res.status_code == 201
+    assert reg_res.data['success'] is True
+    assert reg_res.data['data']['user']['email'] == 'testuser.one@gmail.com'
+    assert User.objects.filter(email='testuser.one@gmail.com').exists()
+
+    # Duplicate email with different case must be rejected
+    dup_res = client.post('/api/v1/auth/register/', {
+        'username': 'otheruser',
+        'email': 'TESTUSER.ONE@gmail.com',
+        'first_name': 'Other',
+        'last_name': 'User',
+        'phone': '9876543211',
+        'password': 'Password@123',
+        'confirm_password': 'Password@123',
+    }, format='json')
+    assert dup_res.status_code == 400
+
+    # Login with exact email
+    login_res = client.post('/api/v1/auth/login/', {
+        'email': 'testuser.one@gmail.com',
+        'password': 'Password@123',
+    }, format='json')
+    assert login_res.status_code == 200
+    assert 'access' in login_res.data
+    assert login_res.data['user']['email'] == 'testuser.one@gmail.com'
+
+    # Login with mixed-case email and whitespace
+    mixed_res = client.post('/api/v1/auth/login/', {
+        'email': ' TestUser.One@GMAIL.COM ',
+        'password': 'Password@123',
+    }, format='json')
+    assert mixed_res.status_code == 200
+    assert 'access' in mixed_res.data
+
+    # Fetch profile from DB using token
+    client.credentials(HTTP_AUTHORIZATION=f"Bearer {mixed_res.data['access']}")
+    me_res = client.get('/api/v1/auth/me/')
+    assert me_res.status_code == 200
+    assert me_res.data['email'] == 'testuser.one@gmail.com'
+    assert me_res.data['username'] == 'testgmailuser'
