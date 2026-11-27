@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuthStore } from '@/lib/store'
 import { toast } from 'sonner'
+import CaptchaBox, { isAllowedEmailDomain } from '@/components/CaptchaBox'
 
 function RegisterForm() {
   const router = useRouter()
@@ -24,6 +25,9 @@ function RegisterForm() {
   })
 
   const [showPassword, setShowPassword] = useState(false)
+  const [captchaInput, setCaptchaInput] = useState('')
+  const [captchaCode, setCaptchaCode] = useState('')
+  const [captchaError, setCaptchaError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [generalError, setGeneralError] = useState<string | null>(null)
 
@@ -51,6 +55,8 @@ function RegisterForm() {
       errors.email = 'Email address is required.'
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
       errors.email = 'Enter a valid email address.'
+    } else if (!isAllowedEmailDomain(formData.email.trim())) {
+      errors.email = 'Only Gmail (@gmail.com) and Microsoft (@outlook.com, @hotmail.com, @live.com, @msn.com) emails are allowed.'
     }
 
     if (!formData.phone.trim()) {
@@ -76,8 +82,14 @@ function RegisterForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setGeneralError(null)
+    setCaptchaError(null)
 
     if (!validate()) return
+
+    if (captchaInput.trim().toUpperCase() !== captchaCode) {
+      setCaptchaError('Incorrect CAPTCHA code. Please try again.')
+      return
+    }
 
     const payload = {
       username: formData.username.trim().toLowerCase(),
@@ -121,17 +133,17 @@ function RegisterForm() {
       className="panel w-full max-w-[460px] p-6 sm:p-[34px] shadow-[0_12px_45px_rgba(19,34,66,0.08)]"
     >
       <Link
-        href="/"
+        href="/welcome"
         className="text-[1.75rem] font-extrabold tracking-[-0.065em] text-[var(--cm-ink)] inline-block mb-3 no-underline"
       >
         Cloud<span className="text-[var(--cm-link)]">Mart</span>
       </Link>
 
       <h1 className="text-[2rem] font-bold text-[var(--cm-ink)] tracking-[-0.035em] mb-1.5">
-        Create account
+        Sign up
       </h1>
       <p className="text-sm text-[var(--cm-muted)] mb-5">
-        Enter your details to get started.
+        Create your CloudMart account.
       </p>
 
       {generalError && (
@@ -190,7 +202,7 @@ function RegisterForm() {
           name="email"
           required
           autoComplete="email"
-          placeholder="you@example.com"
+          placeholder="you@gmail.com"
           value={formData.email}
           onChange={handleChange}
           className="input-field text-sm"
@@ -245,7 +257,7 @@ function RegisterForm() {
         </label>
       </div>
 
-      <label className="flex items-center gap-2.5 font-semibold text-sm text-[var(--cm-ink)] my-3 cursor-pointer select-none">
+      <label className="flex items-center gap-2.5 font-semibold text-sm text-[var(--cm-ink)] my-2 cursor-pointer select-none">
         <input
           type="checkbox"
           checked={showPassword}
@@ -255,12 +267,20 @@ function RegisterForm() {
         <span>Show password</span>
       </label>
 
+      {/* CAPTCHA below Password */}
+      <CaptchaBox
+        value={captchaInput}
+        onChange={setCaptchaInput}
+        onCodeChange={setCaptchaCode}
+        error={captchaError}
+      />
+
       <button type="submit" disabled={isLoading} className="btn-primary w-full py-2.5 text-sm mt-2">
-        {isLoading ? 'Please wait…' : 'Create account'}
+        {isLoading ? 'Creating account…' : 'Sign up'}
       </button>
 
       <p className="text-sm text-[var(--cm-muted)] text-center mt-4 mb-0">
-        Already registered?{' '}
+        Already have an account?{' '}
         <Link href="/login" className="text-[var(--cm-link)] font-semibold hover:underline">
           Sign in
         </Link>

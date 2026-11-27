@@ -42,7 +42,7 @@ export default function Navbar() {
   const handleLogout = async () => {
     await logout()
     toast.success('Signed out successfully')
-    router.push('/')
+    router.replace('/welcome')
   }
 
   const handleSearch = (e: React.FormEvent) => {

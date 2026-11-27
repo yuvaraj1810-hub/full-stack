@@ -49,13 +49,16 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
-        try {
-          const refresh = localStorage.getItem('refresh_token')
-          if (refresh) await api.post('/auth/logout/', { refresh })
-        } catch {}
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('refresh_token')
+        const refresh = typeof window !== 'undefined' ? localStorage.getItem('refresh_token') : null
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
+        }
         set({ user: null, isAuthenticated: false })
+        useCartStore.setState({ cart: null })
+        if (refresh) {
+          api.post('/auth/logout/', { refresh }).catch(() => {})
+        }
       },
 
       loadUser: async () => {
