@@ -8,7 +8,7 @@ interface AuthState {
   isAuthenticated: boolean
   isLoading: boolean
   login: (email: string, password: string) => Promise<void>
-  register: (userData: any) => Promise<void>
+  register: (userData: any) => Promise<any>
   logout: () => Promise<void>
   loadUser: () => Promise<void>
 }
@@ -37,11 +37,8 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true })
         try {
           const { data } = await api.post('/auth/register/', userData)
-          if (data?.data?.tokens?.access) {
-            localStorage.setItem('access_token', data.data.tokens.access)
-            localStorage.setItem('refresh_token', data.data.tokens.refresh)
-          }
-          set({ user: data?.data?.user || null, isAuthenticated: true, isLoading: false })
+          set({ isLoading: false })
+          return data
         } catch (err) {
           set({ isLoading: false })
           throw err

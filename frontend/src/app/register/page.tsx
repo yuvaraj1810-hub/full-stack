@@ -10,7 +10,6 @@ import CaptchaBox, { isAllowedEmailDomain } from '@/components/CaptchaBox'
 function RegisterForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const nextUrl = searchParams.get('next') || '/products'
 
   const { register, isLoading } = useAuthStore()
 
@@ -102,9 +101,12 @@ function RegisterForm() {
     }
 
     try {
-      await register(payload)
-      toast.success('Account created successfully! Welcome to CloudMart.')
-      router.push(nextUrl)
+      const res = await register(payload)
+      const createdEmail = res?.data?.user?.email || payload.email
+      const apiMsg = res?.message || 'Account created successfully'
+      toast.success(`${apiMsg} (${createdEmail}). Please sign in with your credentials.`)
+      const nextParam = searchParams.get('next')
+      router.push(nextParam ? `/login?next=${encodeURIComponent(nextParam)}` : '/login')
     } catch (err: any) {
       const respData = err.response?.data
       if (typeof respData === 'object' && respData !== null) {
@@ -114,13 +116,16 @@ function RegisterForm() {
           else if (typeof val === 'string') extracted[key] = val
         }
         setFieldErrors(extracted)
-        if (extracted.detail || extracted.message) {
-          setGeneralError(extracted.detail || extracted.message)
+        if (extracted.detail || extracted.message || extracted.non_field_errors) {
+          setGeneralError(extracted.detail || extracted.message || extracted.non_field_errors)
         } else {
           setGeneralError('Please correct the highlighted fields.')
         }
       } else {
-        const msg = 'Registration failed. Please check your information and try again.'
+        const status = err.response?.status
+        const msg = status
+          ? `Registration failed (HTTP ${status}). Make sure the backend server and database are running.`
+          : 'Cannot reach the server. Please make sure the backend API is running.'
         setGeneralError(msg)
         toast.error(msg)
       }
