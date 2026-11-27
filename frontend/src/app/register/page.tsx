@@ -3,11 +3,8 @@
 import { useState, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ShoppingBag, Eye, EyeOff, Lock, Mail, User, Phone, ArrowRight, ShieldCheck } from 'lucide-react'
 import { useAuthStore } from '@/lib/store'
 import { toast } from 'sonner'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
 
 function RegisterForm() {
   const router = useRouter()
@@ -119,220 +116,165 @@ function RegisterForm() {
   }
 
   return (
-    <div className="w-full max-w-lg mx-auto">
-      <div className="card p-8 shadow-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-2xl">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 mb-3">
-            <ShoppingBag size={24} />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Create an Account</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Join CloudMart to experience seamless shopping, instant UPI & COD checkout
-          </p>
-        </div>
+    <form
+      onSubmit={handleSubmit}
+      className="panel w-full max-w-[460px] p-6 sm:p-[34px] shadow-[0_12px_45px_rgba(19,34,66,0.08)]"
+    >
+      <Link
+        href="/"
+        className="text-[1.75rem] font-extrabold tracking-[-0.065em] text-[var(--cm-ink)] inline-block mb-3 no-underline"
+      >
+        Cloud<span className="text-[var(--cm-link)]">Mart</span>
+      </Link>
 
-        {/* General Error Banner */}
-        {generalError && (
-          <div className="mb-5 p-3.5 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-400">
-            {generalError}
-          </div>
-        )}
+      <h1 className="text-[2rem] font-bold text-[var(--cm-ink)] tracking-[-0.035em] mb-1.5">
+        Create account
+      </h1>
+      <p className="text-sm text-[var(--cm-muted)] mb-5">
+        Enter your details to get started.
+      </p>
 
-        {/* Registration Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
-                First Name
-              </label>
-              <div className="relative">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={17} />
-                <input
-                  type="text"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  placeholder="Rahul"
-                  className="input-field pl-10 text-sm"
-                />
-              </div>
-            </div>
+      {generalError && (
+        <p role="alert" className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-sm text-red-500 font-medium">
+          {generalError}
+        </p>
+      )}
 
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
-                Last Name
-              </label>
-              <input
-                type="text"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                placeholder="Sharma"
-                className="input-field text-sm"
-              />
-            </div>
-          </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <label className="grid gap-1.5 font-semibold text-sm text-[var(--cm-ink)]">
+          <span>First name</span>
+          <input
+            type="text"
+            name="firstName"
+            autoComplete="given-name"
+            placeholder="Jane"
+            value={formData.firstName}
+            onChange={handleChange}
+            className="input-field text-sm"
+          />
+        </label>
 
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
-              Username *
-            </label>
-            <input
-              type="text"
-              name="username"
-              required
-              value={formData.username}
-              onChange={handleChange}
-              placeholder="rahulsharma"
-              className={`input-field text-sm ${fieldErrors.username ? 'border-red-500 ring-1 ring-red-500' : ''}`}
-            />
-            {fieldErrors.username && (
-              <p className="text-xs text-red-600 dark:text-red-400 mt-1">{fieldErrors.username}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
-              Email Address *
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={17} />
-              <input
-                type="email"
-                name="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="rahul@example.com"
-                className={`input-field pl-10 text-sm ${fieldErrors.email ? 'border-red-500 ring-1 ring-red-500' : ''}`}
-              />
-            </div>
-            {fieldErrors.email && (
-              <p className="text-xs text-red-600 dark:text-red-400 mt-1">{fieldErrors.email}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
-              Phone Number *
-            </label>
-            <div className="relative">
-              <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={17} />
-              <input
-                type="tel"
-                name="phone"
-                required
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="9876543210"
-                className={`input-field pl-10 text-sm ${fieldErrors.phone ? 'border-red-500 ring-1 ring-red-500' : ''}`}
-              />
-            </div>
-            {fieldErrors.phone && (
-              <p className="text-xs text-red-600 dark:text-red-400 mt-1">{fieldErrors.phone}</p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
-                Password * (min 8)
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={17} />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  className={`input-field pl-10 text-sm ${fieldErrors.password ? 'border-red-500 ring-1 ring-red-500' : ''}`}
-                />
-              </div>
-              {fieldErrors.password && (
-                <p className="text-xs text-red-600 dark:text-red-400 mt-1">{fieldErrors.password}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
-                Confirm Password *
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={17} />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="confirmPassword"
-                  required
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  className={`input-field pl-10 text-sm ${fieldErrors.confirmPassword ? 'border-red-500 ring-1 ring-red-500' : ''}`}
-                />
-              </div>
-              {fieldErrors.confirmPassword && (
-                <p className="text-xs text-red-600 dark:text-red-400 mt-1">{fieldErrors.confirmPassword}</p>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 pt-1">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={showPassword}
-                onChange={() => setShowPassword(!showPassword)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              Show passwords
-            </label>
-            <span className="flex items-center gap-1">
-              <ShieldCheck size={14} className="text-green-500" /> 256-bit Secure
-            </span>
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="btn-primary w-full py-3 text-sm font-semibold flex items-center justify-center gap-2 shadow-sm mt-2"
-          >
-            {isLoading ? (
-              <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <>
-                Create Account <ArrowRight size={16} />
-              </>
-            )}
-          </button>
-        </form>
-
-        {/* Footer Link */}
-        <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-          Already have an account?{' '}
-          <Link
-            href={`/login${nextUrl !== '/products' ? `?next=${encodeURIComponent(nextUrl)}` : ''}`}
-            className="font-semibold text-blue-600 dark:text-blue-400 hover:underline"
-          >
-            Sign In Here
-          </Link>
-        </div>
+        <label className="grid gap-1.5 font-semibold text-sm text-[var(--cm-ink)]">
+          <span>Last name</span>
+          <input
+            type="text"
+            name="lastName"
+            autoComplete="family-name"
+            placeholder="Doe"
+            value={formData.lastName}
+            onChange={handleChange}
+            className="input-field text-sm"
+          />
+        </label>
       </div>
-    </div>
+
+      <label className="grid gap-1.5 font-semibold text-sm text-[var(--cm-ink)] my-3">
+        <span>Username</span>
+        <input
+          type="text"
+          name="username"
+          required
+          autoComplete="username"
+          placeholder="janedoe"
+          value={formData.username}
+          onChange={handleChange}
+          className="input-field text-sm"
+        />
+        {fieldErrors.username && <small className="text-red-500 font-normal">{fieldErrors.username}</small>}
+      </label>
+
+      <label className="grid gap-1.5 font-semibold text-sm text-[var(--cm-ink)] my-3">
+        <span>Email</span>
+        <input
+          type="email"
+          name="email"
+          required
+          autoComplete="email"
+          placeholder="you@example.com"
+          value={formData.email}
+          onChange={handleChange}
+          className="input-field text-sm"
+        />
+        {fieldErrors.email && <small className="text-red-500 font-normal">{fieldErrors.email}</small>}
+      </label>
+
+      <label className="grid gap-1.5 font-semibold text-sm text-[var(--cm-ink)] my-3">
+        <span>Phone number</span>
+        <input
+          type="tel"
+          name="phone"
+          required
+          autoComplete="tel"
+          placeholder="9876543210"
+          value={formData.phone}
+          onChange={handleChange}
+          className="input-field text-sm"
+        />
+        {fieldErrors.phone && <small className="text-red-500 font-normal">{fieldErrors.phone}</small>}
+      </label>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 my-3">
+        <label className="grid gap-1.5 font-semibold text-sm text-[var(--cm-ink)]">
+          <span>Password</span>
+          <input
+            type={showPassword ? 'text' : 'password'}
+            name="password"
+            required
+            autoComplete="new-password"
+            placeholder="••••••••"
+            value={formData.password}
+            onChange={handleChange}
+            className="input-field text-sm"
+          />
+          {fieldErrors.password && <small className="text-red-500 font-normal">{fieldErrors.password}</small>}
+        </label>
+
+        <label className="grid gap-1.5 font-semibold text-sm text-[var(--cm-ink)]">
+          <span>Confirm password</span>
+          <input
+            type={showPassword ? 'text' : 'password'}
+            name="confirmPassword"
+            required
+            autoComplete="new-password"
+            placeholder="••••••••"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            className="input-field text-sm"
+          />
+          {fieldErrors.confirmPassword && <small className="text-red-500 font-normal">{fieldErrors.confirmPassword}</small>}
+        </label>
+      </div>
+
+      <label className="flex items-center gap-2.5 font-semibold text-sm text-[var(--cm-ink)] my-3 cursor-pointer select-none">
+        <input
+          type="checkbox"
+          checked={showPassword}
+          onChange={(e) => setShowPassword(e.target.checked)}
+          className="w-4 h-4 accent-[var(--cm-blue)] rounded"
+        />
+        <span>Show password</span>
+      </label>
+
+      <button type="submit" disabled={isLoading} className="btn-primary w-full py-2.5 text-sm mt-2">
+        {isLoading ? 'Please wait…' : 'Create account'}
+      </button>
+
+      <p className="text-sm text-[var(--cm-muted)] text-center mt-4 mb-0">
+        Already registered?{' '}
+        <Link href="/login" className="text-[var(--cm-link)] font-semibold hover:underline">
+          Sign in
+        </Link>
+      </p>
+    </form>
   )
 }
 
 export default function RegisterPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50/50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
-      <Navbar />
-      <main className="flex-1 flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-        <Suspense fallback={<div className="text-center py-12 text-sm text-gray-500">Loading sign up...</div>}>
-          <RegisterForm />
-        </Suspense>
-      </main>
-      <Footer />
+    <div className="min-h-screen grid place-items-center bg-[var(--cm-bg)] text-[var(--cm-ink)] px-4 py-8">
+      <Suspense fallback={<div className="text-sm text-[var(--cm-muted)]">Loading CloudMart…</div>}>
+        <RegisterForm />
+      </Suspense>
     </div>
   )
 }

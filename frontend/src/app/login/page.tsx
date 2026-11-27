@@ -3,11 +3,8 @@
 import { useState, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ShoppingBag, Eye, EyeOff, Lock, Mail, ArrowRight, ShieldCheck, CheckCircle } from 'lucide-react'
 import { useAuthStore, useCartStore } from '@/lib/store'
 import { toast } from 'sonner'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
 
 function LoginForm() {
   const router = useRouter()
@@ -34,13 +31,13 @@ function LoginForm() {
     try {
       await login(email.trim(), password)
       toast.success('Welcome back to CloudMart!')
-      // Refresh cart on login
       await fetchCart().catch(() => {})
       router.push(nextUrl)
     } catch (err: any) {
-      const msg = err.response?.data?.detail || 
-                  err.response?.data?.message || 
-                  'Invalid credentials. Please verify your email and password.'
+      const msg =
+        err.response?.data?.detail ||
+        err.response?.data?.message ||
+        'Please check your details and try again.'
       setErrorMessage(msg)
       toast.error(msg)
     }
@@ -58,136 +55,111 @@ function LoginForm() {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="card p-8 shadow-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-2xl">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 mb-3">
-            <ShoppingBag size={24} />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome Back</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Sign in to access your orders, cart, and account
-          </p>
-        </div>
+    <form
+      onSubmit={handleSubmit}
+      className="panel w-full max-w-[410px] p-6 sm:p-[34px] shadow-[0_12px_45px_rgba(19,34,66,0.08)]"
+    >
+      <Link
+        href="/"
+        className="text-[1.75rem] font-extrabold tracking-[-0.065em] text-[var(--cm-ink)] inline-block mb-3 no-underline"
+      >
+        Cloud<span className="text-[var(--cm-link)]">Mart</span>
+      </Link>
 
-        {/* Error Alert */}
-        {errorMessage && (
-          <div className="mb-5 p-3.5 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-400">
-            {errorMessage}
-          </div>
-        )}
+      <h1 className="text-[2rem] font-bold text-[var(--cm-ink)] tracking-[-0.035em] mb-1.5">
+        Welcome back
+      </h1>
+      <p className="text-sm text-[var(--cm-muted)] mb-5">
+        Sign in to your CloudMart account.
+      </p>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
-              Email Address
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input
-                type="email"
-                required
-                autoComplete="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="input-field pl-10 text-sm"
-              />
-            </div>
-          </div>
+      {errorMessage && (
+        <p role="alert" className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-sm text-red-500 font-medium">
+          {errorMessage}
+        </p>
+      )}
 
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                Password
-              </label>
-            </div>
-            <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                required
-                autoComplete="current-password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="input-field pl-10 pr-10 text-sm"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-          </div>
+      <label className="grid gap-1.5 font-semibold text-sm text-[var(--cm-ink)] my-3">
+        <span>Email</span>
+        <input
+          type="email"
+          name="email"
+          required
+          autoComplete="email"
+          placeholder="you@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="input-field text-sm"
+        />
+      </label>
 
+      <label className="grid gap-1.5 font-semibold text-sm text-[var(--cm-ink)] my-3">
+        <span>Password</span>
+        <input
+          type={showPassword ? 'text' : 'password'}
+          name="password"
+          required
+          autoComplete="current-password"
+          placeholder="••••••••"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="input-field text-sm"
+        />
+      </label>
+
+      <label className="flex items-center gap-2.5 font-semibold text-sm text-[var(--cm-ink)] my-3 cursor-pointer select-none">
+        <input
+          type="checkbox"
+          checked={showPassword}
+          onChange={(e) => setShowPassword(e.target.checked)}
+          className="w-4 h-4 accent-[var(--cm-blue)] rounded"
+        />
+        <span>Show password</span>
+      </label>
+
+      <button type="submit" disabled={isLoading} className="btn-primary w-full py-2.5 text-sm mt-2">
+        {isLoading ? 'Please wait…' : 'Sign in'}
+      </button>
+
+      {/* Quick Fill Demo Accounts */}
+      <div className="mt-5 pt-4 border-t border-[var(--cm-line)]">
+        <p className="text-xs text-[var(--cm-muted)] text-center mb-2">
+          Quick fill demo accounts:
+        </p>
+        <div className="grid grid-cols-2 gap-2">
           <button
-            type="submit"
-            disabled={isLoading}
-            className="btn-primary w-full py-3 text-sm font-semibold flex items-center justify-center gap-2 shadow-sm"
+            type="button"
+            onClick={() => handleFillDemo('customer')}
+            className="btn-secondary text-xs py-2"
           >
-            {isLoading ? (
-              <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <>
-                Sign In <ArrowRight size={16} />
-              </>
-            )}
+            Demo Customer
           </button>
-        </form>
-
-        {/* Quick Fill Demo Credentials */}
-        <div className="mt-6 pt-5 border-t border-gray-100 dark:border-gray-800">
-          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 text-center">
-            Quick Fill Demo Accounts:
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => handleFillDemo('customer')}
-              className="py-1.5 px-2.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors text-center"
-            >
-              Demo Customer
-            </button>
-            <button
-              type="button"
-              onClick={() => handleFillDemo('admin')}
-              className="py-1.5 px-2.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors text-center"
-            >
-              Demo Admin
-            </button>
-          </div>
-        </div>
-
-        {/* Footer Link */}
-        <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-          Don't have an account?{' '}
-          <Link
-            href={`/register${nextUrl !== '/' ? `?next=${encodeURIComponent(nextUrl)}` : ''}`}
-            className="font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+          <button
+            type="button"
+            onClick={() => handleFillDemo('admin')}
+            className="btn-secondary text-xs py-2"
           >
-            Create an Account
-          </Link>
+            Demo Admin
+          </button>
         </div>
       </div>
-    </div>
+
+      <p className="text-sm text-[var(--cm-muted)] text-center mt-4 mb-0">
+        New to CloudMart?{' '}
+        <Link href="/register" className="text-[var(--cm-link)] font-semibold hover:underline">
+          Create account
+        </Link>
+      </p>
+    </form>
   )
 }
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50/50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
-      <Navbar />
-      <main className="flex-1 flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-        <Suspense fallback={<div className="text-center py-12 text-sm text-gray-500">Loading sign in...</div>}>
-          <LoginForm />
-        </Suspense>
-      </main>
-      <Footer />
+    <div className="min-h-screen grid place-items-center bg-[var(--cm-bg)] text-[var(--cm-ink)] px-4 py-8">
+      <Suspense fallback={<div className="text-sm text-[var(--cm-muted)]">Loading CloudMart…</div>}>
+        <LoginForm />
+      </Suspense>
     </div>
   )
 }

@@ -245,10 +245,10 @@ export default function CheckoutPage() {
   // ── Render 1: Order Confirmation Screen ──
   if (completedOrder) {
     return (
-      <div className="min-h-screen flex flex-col bg-gray-50/50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+      <div className="min-h-screen flex flex-col bg-[var(--cm-bg)] text-[var(--cm-ink)]">
         <Navbar />
         <main className="flex-1 flex items-center justify-center px-4 py-16">
-          <div className="card max-w-lg w-full p-8 text-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-xl rounded-2xl space-y-6">
+          <div className="panel max-w-lg w-full text-center space-y-6">
             <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 flex items-center justify-center mx-auto">
               <CheckCircle size={36} />
             </div>
@@ -309,10 +309,10 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50/50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors">
+    <div className="min-h-screen flex flex-col bg-[var(--cm-bg)] text-[var(--cm-ink)] transition-colors">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+      <main className="flex-1 cm-container py-8 w-full">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-6">
           <Link href="/" className="hover:text-blue-600 dark:hover:text-blue-400">Home</Link>

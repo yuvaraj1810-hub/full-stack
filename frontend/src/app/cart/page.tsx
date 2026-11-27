@@ -3,18 +3,6 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { 
-  ShoppingCart, 
-  Trash2, 
-  Plus, 
-  Minus, 
-  ArrowRight, 
-  ShieldCheck, 
-  Truck, 
-  RotateCcw,
-  ShoppingBag,
-  AlertCircle
-} from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { useCartStore, useAuthStore } from '@/lib/store'
@@ -23,7 +11,7 @@ import { toast } from 'sonner'
 
 export default function CartPage() {
   const router = useRouter()
-  const { cart, isLoading, fetchCart, updateItem, removeItem, clearCart } = useCartStore()
+  const { cart, fetchCart, updateItem, removeItem, clearCart } = useCartStore()
   const { isAuthenticated } = useAuthStore()
   const [updatingItemId, setUpdatingItemId] = useState<number | null>(null)
   const [clearing, setClearing] = useState(false)
@@ -60,7 +48,7 @@ export default function CartPage() {
       setUpdatingItemId(itemId)
       await removeItem(itemId)
       toast.success('Item removed from cart')
-    } catch (err: any) {
+    } catch {
       toast.error('Could not remove item')
     } finally {
       setUpdatingItemId(null)
@@ -73,266 +61,165 @@ export default function CartPage() {
       setClearing(true)
       await clearCart()
       toast.success('Cart cleared')
-    } catch (err: any) {
+    } catch {
       toast.error('Failed to clear cart')
     } finally {
       setClearing(false)
     }
   }
 
-  // Calculate pricing server-matching logic
   const subtotalPaise = cart?.total_paise || 0
-  const freeShippingThresholdPaise = 49900 // ₹499
-  const shippingPaise = subtotalPaise === 0 || subtotalPaise >= freeShippingThresholdPaise ? 0 : 4900 // ₹49
-  const taxPaise = Math.round(subtotalPaise * 0.18) // 18% GST
+  const freeShippingThresholdPaise = 49900
+  const shippingPaise = subtotalPaise === 0 || subtotalPaise >= freeShippingThresholdPaise ? 0 : 4900
+  const taxPaise = Math.round(subtotalPaise * 0.18)
   const grandTotalPaise = subtotalPaise + shippingPaise + taxPaise
-  const amountToFreeShipping = Math.max(0, freeShippingThresholdPaise - subtotalPaise)
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50/50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors">
+    <div className="min-h-screen flex flex-col bg-[var(--cm-bg)] text-[var(--cm-ink)]">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-6">
-          <Link href="/" className="hover:text-blue-600 dark:hover:text-blue-400">Home</Link>
-          <span>/</span>
-          <span className="text-gray-900 dark:text-gray-200 font-medium">Shopping Cart</span>
-        </div>
-
+      <main className="flex-1 cm-container w-full py-7">
         {!isAuthenticated ? (
-          <div className="card p-12 text-center max-w-md mx-auto space-y-5 my-12 bg-white dark:bg-gray-900">
-            <div className="w-16 h-16 rounded-2xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto">
-              <ShoppingCart size={32} />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Sign In to View Your Cart</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Your shopping bag is safely stored in your CloudMart account. Sign in to view items and checkout.
-              </p>
-            </div>
-            <Link href="/login?next=/cart" className="btn-primary w-full py-2.5 text-sm inline-flex items-center justify-center gap-2">
-              Sign In to CloudMart <ArrowRight size={16} />
+          <div className="panel max-w-md mx-auto text-center space-y-4 my-10">
+            <h1 className="text-2xl font-bold text-[var(--cm-ink)]">Sign in to view your cart</h1>
+            <p className="text-sm text-[var(--cm-muted)]">
+              Your shopping bag is stored in your CloudMart account.
+            </p>
+            <Link href="/login?next=/cart" className="btn-primary w-full text-sm">
+              Sign in to CloudMart
             </Link>
           </div>
         ) : !cart || cart.items.length === 0 ? (
-          <div className="card p-12 text-center max-w-md mx-auto space-y-5 my-12 bg-white dark:bg-gray-900">
-            <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 flex items-center justify-center mx-auto">
-              <ShoppingBag size={32} />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Your Cart is Empty</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Looks like you haven't added anything to your cart yet. Explore our catalog to find great deals!
-              </p>
-            </div>
-            <Link href="/products" className="btn-primary w-full py-2.5 text-sm inline-flex items-center justify-center gap-2">
-              Explore Products <ArrowRight size={16} />
+          <div className="space-y-4">
+            <h1 className="text-[2rem] font-bold text-[var(--cm-ink)]">Your cart is empty</h1>
+            <Link href="/products" className="text-sm font-semibold text-[var(--cm-link)] hover:underline">
+              Continue shopping →
             </Link>
           </div>
         ) : (
           <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-              <div>
-                <h1 className="text-3xl font-extrabold text-gray-950 dark:text-white tracking-tight">
-                  Shopping Cart
-                </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                  {cart.item_count} {cart.item_count === 1 ? 'item' : 'items'} in your cart
-                </p>
-              </div>
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
+              <h1 className="text-[2rem] font-bold text-[var(--cm-ink)] tracking-[-0.035em]">
+                Your cart
+              </h1>
               <button
+                type="button"
                 onClick={handleClearCart}
                 disabled={clearing}
-                className="text-xs text-red-600 dark:text-red-400 hover:underline flex items-center gap-1 self-start sm:self-auto"
+                className="btn-secondary text-xs py-2 px-3"
               >
-                <Trash2 size={14} /> Clear entire cart
+                {clearing ? 'Clearing…' : 'Clear cart'}
               </button>
             </div>
 
-            {/* Free Shipping Progress */}
-            {amountToFreeShipping > 0 ? (
-              <div className="mb-6 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 flex items-center gap-3">
-                <Truck size={20} className="text-blue-600 dark:text-blue-400 shrink-0" />
-                <div className="flex-1 text-xs text-blue-900 dark:text-blue-200">
-                  Add <span className="font-bold">{formatINR(amountToFreeShipping)}</span> more to qualify for <span className="font-bold">FREE Express Delivery</span>!
-                </div>
-              </div>
-            ) : (
-              <div className="mb-6 p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 flex items-center gap-3">
-                <Truck size={20} className="text-green-600 dark:text-green-400 shrink-0" />
-                <div className="text-xs text-green-900 dark:text-green-200 font-medium">
-                  🎉 Congratulations! Your order qualifies for <span className="font-bold">FREE Delivery</span>.
-                </div>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-              {/* Items List */}
-              <div className="lg:col-span-8 space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-5 items-start">
+              {/* Items Panel */}
+              <section className="panel divide-y divide-[var(--cm-line)]">
                 {cart.items.map((item) => {
                   const variant = item.variant
                   const availableStock = variant.inventory?.available_quantity ?? 99
-                  const isOutOfStock = availableStock <= 0
-                  const hasStockWarning = item.quantity > availableStock
                   const itemImage = variant.product_image || variant.product?.primary_image?.image
 
                   return (
-                    <div 
-                      key={item.id} 
-                      className="card p-5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row gap-5 items-start sm:items-center justify-between"
-                    >
-                      {/* Product Thumbnail & Details */}
-                      <div className="flex items-center gap-4 flex-1">
-                        <div className="w-20 h-20 rounded-xl bg-gray-100 dark:bg-gray-800 shrink-0 flex items-center justify-center overflow-hidden border border-gray-200 dark:border-gray-700">
-                          {itemImage ? (
-                            <img
-                              src={getImageUrl(itemImage)}
-                              alt={variant.product_name || variant.sku}
-                              className="w-full h-full object-contain p-2"
-                            />
-                          ) : (
-                            <ShoppingBag size={28} className="text-gray-400" />
-                          )}
-                        </div>
+                    <article key={item.id} className="flex items-center gap-4 py-4 first:pt-0 last:pb-0">
+                      {itemImage ? (
+                        <img
+                          src={getImageUrl(itemImage)}
+                          alt={variant.product_name || variant.sku}
+                          className="w-[85px] h-[70px] object-contain bg-white rounded-lg shrink-0 border border-[var(--cm-line)]"
+                        />
+                      ) : (
+                        <span className="w-[85px] h-[70px] grid place-items-center bg-[var(--cm-tint)] text-[var(--cm-muted)] rounded-lg text-xs shrink-0">
+                          Item
+                        </span>
+                      )}
 
-                        <div className="space-y-1">
-                          <h3 className="font-semibold text-base text-gray-950 dark:text-white line-clamp-1">
-                            {variant.product_name || `Product SKU: ${variant.sku}`}
-                          </h3>
-                          <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                            <span>SKU: {variant.sku}</span>
-                            {variant.attributes && Object.keys(variant.attributes).length > 0 && (
-                              <>
-                                <span>•</span>
-                                <span>
-                                  {Object.entries(variant.attributes)
-                                    .map(([k, v]) => `${k}: ${v}`)
-                                    .join(', ')}
-                                </span>
-                              </>
-                            )}
-                          </div>
-                          <div className="text-sm font-bold text-gray-900 dark:text-white pt-0.5">
-                            {formatINR(variant.price_paise)} each
-                          </div>
+                      <div className="flex-1 min-w-0">
+                        <Link
+                          href={`/products?search=${encodeURIComponent(variant.product_name || variant.sku)}`}
+                          className="font-semibold text-[var(--cm-link)] hover:underline block truncate"
+                        >
+                          {variant.product_name || `SKU: ${variant.sku}`}
+                        </Link>
+                        <p className="text-sm text-[var(--cm-muted)] my-1">
+                          {formatINR(variant.price_paise)} each
+                        </p>
 
-                          {hasStockWarning && (
-                            <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 font-medium">
-                              <AlertCircle size={13} /> Only {availableStock} in stock. Please reduce quantity.
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Quantity Controls & Subtotal */}
-                      <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-4 pt-3 sm:pt-0 border-t sm:border-t-0 border-gray-100 dark:border-gray-800">
-                        {/* Quantity Stepper */}
-                        <div className="flex items-center border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-800">
+                        <div className="flex flex-wrap items-center gap-2.5 mt-2">
                           <button
                             type="button"
+                            aria-label="Decrease quantity"
+                            disabled={item.quantity <= 1 || updatingItemId === item.id}
                             onClick={() => handleUpdateQuantity(item.id, item.quantity, -1, availableStock)}
-                            disabled={updatingItemId === item.id}
-                            className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors disabled:opacity-50"
-                            title="Decrease quantity"
+                            className="btn-primary py-1.5 px-3 text-sm"
                           >
-                            <Minus size={14} />
+                            −
                           </button>
-                          <span className="w-9 text-center text-xs font-semibold text-gray-900 dark:text-white">
-                            {updatingItemId === item.id ? '...' : item.quantity}
-                          </span>
+                          <b className="text-sm font-bold min-w-[20px] text-center">
+                            {updatingItemId === item.id ? '…' : item.quantity}
+                          </b>
                           <button
                             type="button"
+                            aria-label="Increase quantity"
+                            disabled={item.quantity >= availableStock || updatingItemId === item.id}
                             onClick={() => handleUpdateQuantity(item.id, item.quantity, 1, availableStock)}
-                            disabled={updatingItemId === item.id || item.quantity >= availableStock}
-                            className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors disabled:opacity-50"
-                            title="Increase quantity"
+                            className="btn-primary py-1.5 px-3 text-sm"
                           >
-                            <Plus size={14} />
+                            +
                           </button>
-                        </div>
-
-                        {/* Subtotal & Delete */}
-                        <div className="flex items-center gap-3">
-                          <span className="text-base font-bold text-gray-950 dark:text-white">
-                            {formatINR(item.subtotal_paise)}
-                          </span>
                           <button
                             type="button"
-                            onClick={() => handleRemoveItem(item.id)}
                             disabled={updatingItemId === item.id}
-                            className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                            title="Remove item"
+                            onClick={() => handleRemoveItem(item.id)}
+                            className="btn-secondary py-1.5 px-3 text-xs"
                           >
-                            <Trash2 size={16} />
+                            Remove
                           </button>
                         </div>
                       </div>
-                    </div>
+
+                      <div className="text-right font-bold text-sm sm:text-base text-[var(--cm-ink)] shrink-0">
+                        {formatINR(item.subtotal_paise)}
+                      </div>
+                    </article>
                   )
                 })}
-              </div>
+              </section>
 
-              {/* Order Summary Sidebar */}
-              <div className="lg:col-span-4 sticky top-24">
-                <div className="card p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 space-y-5 rounded-2xl shadow-sm">
-                  <h2 className="text-lg font-bold text-gray-950 dark:text-white pb-3 border-b border-gray-100 dark:border-gray-800">
-                    Order Summary
-                  </h2>
+              {/* Order Summary Aside */}
+              <aside className="panel space-y-3 lg:sticky lg:top-28">
+                <h2 className="text-xl font-bold text-[var(--cm-ink)] mb-2">Order summary</h2>
 
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                      <span>Subtotal ({cart.item_count} items)</span>
-                      <span className="font-semibold text-gray-900 dark:text-white">{formatINR(subtotalPaise)}</span>
-                    </div>
+                {cart.items.map((item) => (
+                  <p key={item.id} className="flex justify-between gap-2 text-sm text-[var(--cm-muted)]">
+                    <span className="truncate">
+                      {item.variant.product_name || item.variant.sku} × {item.quantity}
+                    </span>
+                    <b className="text-[var(--cm-ink)] shrink-0">{formatINR(item.subtotal_paise)}</b>
+                  </p>
+                ))}
 
-                    <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                      <span>Estimated Shipping</span>
-                      <span>
-                        {shippingPaise === 0 ? (
-                          <span className="text-green-600 dark:text-green-400 font-semibold">FREE</span>
-                        ) : (
-                          <span className="font-semibold text-gray-900 dark:text-white">{formatINR(shippingPaise)}</span>
-                        )}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                      <span>Estimated GST (18%)</span>
-                      <span className="font-semibold text-gray-900 dark:text-white">{formatINR(taxPaise)}</span>
-                    </div>
-
-                    <div className="pt-3 border-t border-gray-100 dark:border-gray-800 flex justify-between items-baseline">
-                      <span className="text-base font-bold text-gray-950 dark:text-white">Estimated Total</span>
-                      <span className="text-2xl font-extrabold text-blue-600 dark:text-blue-400">
-                        {formatINR(grandTotalPaise)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <Link
-                    href="/checkout"
-                    className="btn-primary w-full py-3 text-sm font-semibold flex items-center justify-center gap-2 shadow-sm"
-                  >
-                    Proceed to Checkout <ArrowRight size={16} />
-                  </Link>
-
-                  <div className="pt-4 border-t border-gray-100 dark:border-gray-800 space-y-2 text-xs text-gray-500 dark:text-gray-400">
-                    <div className="flex items-center gap-2">
-                      <ShieldCheck size={16} className="text-green-500" />
-                      <span>Safe & Secure 256-bit SSL Checkout</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Truck size={16} className="text-blue-500" />
-                      <span>Instant UPI & Cash on Delivery Available</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <RotateCcw size={16} className="text-purple-500" />
-                      <span>7-Day Return & Replacement Policy</span>
-                    </div>
-                  </div>
+                <div className="flex justify-between text-sm text-[var(--cm-muted)]">
+                  <span>Shipping</span>
+                  <b className="text-[var(--cm-ink)]">{shippingPaise === 0 ? 'FREE' : formatINR(shippingPaise)}</b>
                 </div>
-              </div>
+
+                <div className="flex justify-between text-sm text-[var(--cm-muted)]">
+                  <span>Estimated GST (18%)</span>
+                  <b className="text-[var(--cm-ink)]">{formatINR(taxPaise)}</b>
+                </div>
+
+                <hr className="border-t border-[var(--cm-line)] my-2" />
+
+                <h3 className="flex justify-between items-baseline text-lg font-bold text-[var(--cm-ink)]">
+                  <span>Total</span>
+                  <span>{formatINR(grandTotalPaise)}</span>
+                </h3>
+
+                <Link href="/checkout" className="btn-primary w-full text-sm mt-2 no-underline">
+                  Proceed to checkout
+                </Link>
+              </aside>
             </div>
           </div>
         )}

@@ -27,8 +27,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (checking) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-950">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+      <div className="flex items-center justify-center min-h-screen bg-[var(--cm-bg)]">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[var(--cm-blue)]" />
       </div>
     )
   }
@@ -36,11 +36,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (!isAuthenticated || !user?.is_staff) return null
 
   return (
-    <div className="flex min-h-screen bg-gray-950 text-white">
-      <AdminSidebar />
-      <main className="flex-1 overflow-auto">
-        {children}
-      </main>
+    <div className="min-h-screen bg-[var(--cm-bg)] text-[var(--cm-ink)]">
+      <div className="cm-container py-6 grid grid-cols-1 md:grid-cols-[200px_minmax(0,1fr)] gap-5 items-start">
+        <AdminSidebar />
+        <main className="min-w-0">{children}</main>
+      </div>
     </div>
   )
 }
