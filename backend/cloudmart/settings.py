@@ -121,7 +121,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'apps.users.authentication.CookieJWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -131,6 +131,10 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter',
     ],
+    'DEFAULT_THROTTLE_RATES': {
+        'login': config('LOGIN_THROTTLE_RATE', default='10/min'),
+        'password_reset': config('PASSWORD_RESET_THROTTLE_RATE', default='5/min'),
+    },
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
     'DEFAULT_RENDERER_CLASSES': [
@@ -172,6 +176,24 @@ CSRF_TRUSTED_ORIGINS = [o.strip() for o in CSRF_TRUSTED_ORIGINS if o.strip()]
 # Environment
 ENVIRONMENT = config('ENVIRONMENT', default='development')
 IS_DEVELOPMENT = ENVIRONMENT == 'development'
+
+# HttpOnly Auth Cookies & HTTPS Security
+AUTH_COOKIE_ACCESS = 'cm_access'
+AUTH_COOKIE_REFRESH = 'cm_refresh'
+AUTH_COOKIE_SAMESITE = 'Lax'
+AUTH_COOKIE_SECURE = config('AUTH_COOKIE_SECURE', default=not IS_DEVELOPMENT, cast=bool)
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = AUTH_COOKIE_SECURE
+CSRF_COOKIE_SECURE = AUTH_COOKIE_SECURE
+
+# Email / Password Reset
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@cloudmart.local')
+FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:3000')
 
 # Disable dev-only payment simulator in production
 UPI_DEV_SIMULATOR_ENABLED = IS_DEVELOPMENT

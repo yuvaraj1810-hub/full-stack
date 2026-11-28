@@ -2,6 +2,7 @@
 Management command: seed_data
 Creates demo categories, products, admin user and a sample customer.
 """
+from typing import Any
 from django.core.management.base import BaseCommand
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
@@ -16,28 +17,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write('Seeding data...')
 
-        # Admin
-        if not User.objects.filter(email='admin@cloudmart.local').exists():
-            admin = User.objects.create_superuser(
-                username='admin',
-                email='admin@cloudmart.local',
-                password='Admin@1234',
-                first_name='Cloud',
-                last_name='Admin',
-            )
-            self.stdout.write(self.style.SUCCESS('Created admin: admin@cloudmart.local / Admin@1234'))
-
-        # Customer
-        if not User.objects.filter(email='customer@cloudmart.local').exists():
-            User.objects.create_user(
-                username='customer1',
-                email='customer@cloudmart.local',
-                password='Customer@1234',
-                first_name='Test',
-                last_name='Customer',
-                phone='9876543210',
-            )
-            self.stdout.write(self.style.SUCCESS('Created customer: customer@cloudmart.local / Customer@1234'))
+        # Admin (never hardcode credentials; create via `python manage.py createsuperuser`)
+        admin_user = User.objects.filter(is_superuser=True).order_by('id').first()
+        if not admin_user:
+            self.stdout.write(self.style.WARNING(
+                'No superuser found. Create an admin account with: python manage.py createsuperuser'
+            ))
 
         # Categories
         categories_data = [
@@ -47,13 +32,13 @@ class Command(BaseCommand):
             ('Books', 'books'),
             ('Sports', 'sports'),
         ]
-        categories = {}
+        categories: dict[str, Category] = {}
         for name, slug in categories_data:
             cat, _ = Category.objects.get_or_create(slug=slug, defaults={'name': name})
             categories[slug] = cat
 
         # Products
-        products_data = [
+        products_data: list[dict[str, Any]] = [
             {
                 'name': 'Wireless Bluetooth Headphones',
                 'description': 'Premium noise-cancelling wireless headphones with 30hr battery life.',
@@ -109,7 +94,7 @@ class Command(BaseCommand):
             },
         ]
 
-        admin_user = User.objects.get(email='admin@cloudmart.local')
+        admin_user = User.objects.filter(is_superuser=True).order_by('id').first()
         for pd in products_data:
             slug = slugify(pd['name'])
             product, created = Product.objects.get_or_create(

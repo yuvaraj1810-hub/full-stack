@@ -15,39 +15,44 @@ export const api = axios.create({
     'Cache-Control': 'no-cache',
     'Pragma': 'no-cache',
   },
-  withCredentials: false,
+  withCredentials: true,
 })
 
-// Attach JWT token from localStorage on every request
-api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('access_token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-  }
-  return config
-})
-
-// Auto-refresh on 401
+// Auto-refresh on 401 using HttpOnly refresh cookie
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config
-    if (error.response?.status === 401 && !original._retry) {
+    const url: string = original?.url || ''
+    const isAuthEndpoint =
+      url.includes('/auth/login/') ||
+      url.includes('/auth/register/') ||
+      url.includes('/auth/token/refresh/') ||
+      url.includes('/auth/forgot-password/') ||
+      url.includes('/auth/reset-password/')
+
+    if (error.response?.status === 401 && original && !original._retry && !isAuthEndpoint) {
       original._retry = true
       try {
-        const refresh = localStorage.getItem('refresh_token')
-        if (refresh) {
-          const { data } = await axios.post(`${API_URL}/api/v1/auth/token/refresh/`, { refresh })
-          localStorage.setItem('access_token', data.access)
-          original.headers.Authorization = `Bearer ${data.access}`
-          return api(original)
-        }
+        await axios.post(`${API_URL}/api/v1/auth/token/refresh/`, {}, { withCredentials: true })
+        return api(original)
       } catch {
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('refresh_token')
-        if (typeof window !== 'undefined') window.location.href = '/user/login'
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('cloudmart-auth')
+          const path = window.location.pathname
+          const isPublicRoute =
+            path === '/user' ||
+            path === '/user/' ||
+            path.startsWith('/user/welcome') ||
+            path.startsWith('/user/products') ||
+            path.startsWith('/user/login') ||
+            path.startsWith('/user/register') ||
+            path.startsWith('/user/forgot-password') ||
+            path.startsWith('/user/reset-password')
+          if (!url.includes('/auth/me/') && !isPublicRoute) {
+            window.location.href = '/user/login'
+          }
+        }
       }
     }
     return Promise.reject(error)

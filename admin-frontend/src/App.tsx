@@ -85,11 +85,6 @@ export default function App() {
   }, [dark])
 
   useEffect(() => {
-    const token = localStorage.getItem(ACCESS_KEY)
-    if (!token) {
-      setCheckingAuth(false)
-      return
-    }
     api
       .get('/auth/me/')
       .then((res) => {
@@ -149,12 +144,13 @@ export default function App() {
     try {
       const { data } = await api.post('/auth/login/', { email: email.trim(), password })
       if (!data.user?.is_staff && !data.user?.is_superuser) {
+        await api.post('/auth/logout/', {}).catch(() => {})
         showMsg('err', 'Access denied. Admin privileges required.')
         setAuthBusy(false)
         return
       }
-      localStorage.setItem(ACCESS_KEY, data.access)
-      localStorage.setItem(REFRESH_KEY, data.refresh)
+      localStorage.removeItem(ACCESS_KEY)
+      localStorage.removeItem(REFRESH_KEY)
       setUser(data.user)
     } catch (err: any) {
       showMsg('err', err.response?.data?.detail || 'Invalid admin email or password.')
@@ -163,7 +159,8 @@ export default function App() {
     }
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await api.post('/auth/logout/', {}).catch(() => {})
     localStorage.removeItem(ACCESS_KEY)
     localStorage.removeItem(REFRESH_KEY)
     setUser(null)
@@ -363,7 +360,7 @@ export default function App() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@cloudmart.local"
+              placeholder="admin@example.com"
               className="input-field text-sm"
             />
           </label>

@@ -112,15 +112,20 @@ function LoginForm() {
         />
       </label>
 
-      <label className="flex items-center gap-2.5 font-semibold text-sm text-[var(--cm-ink)] my-2 cursor-pointer select-none">
-        <input
-          type="checkbox"
-          checked={showPassword}
-          onChange={(e) => setShowPassword(e.target.checked)}
-          className="w-4 h-4 accent-[var(--cm-blue)] rounded"
-        />
-        <span>Show password</span>
-      </label>
+      <div className="flex items-center justify-between my-2">
+        <label className="flex items-center gap-2.5 font-semibold text-sm text-[var(--cm-ink)] cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={showPassword}
+            onChange={(e) => setShowPassword(e.target.checked)}
+            className="w-4 h-4 accent-[var(--cm-blue)] rounded"
+          />
+          <span>Show password</span>
+        </label>
+        <Link href="/forgot-password" className="text-sm text-[var(--cm-link)] font-semibold hover:underline">
+          Forgot password?
+        </Link>
+      </div>
 
       {/* CAPTCHA below Password */}
       <CaptchaBox

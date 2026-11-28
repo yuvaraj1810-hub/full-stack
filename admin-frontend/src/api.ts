@@ -8,13 +8,10 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 })
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem(ACCESS_KEY)
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
   if (config.data instanceof FormData) {
     delete config.headers['Content-Type']
   }
@@ -25,19 +22,16 @@ api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config
-    if (error.response?.status === 401 && !original?._retry) {
+    const url: string = original?.url || ''
+    const isAuthEndpoint = url.includes('/auth/login/') || url.includes('/auth/token/refresh/')
+    if (error.response?.status === 401 && original && !original._retry && !isAuthEndpoint) {
       original._retry = true
-      const refresh = localStorage.getItem(REFRESH_KEY)
-      if (refresh) {
-        try {
-          const { data } = await axios.post('/api/v1/auth/token/refresh/', { refresh })
-          localStorage.setItem(ACCESS_KEY, data.access)
-          original.headers.Authorization = `Bearer ${data.access}`
-          return api(original)
-        } catch {
-          localStorage.removeItem(ACCESS_KEY)
-          localStorage.removeItem(REFRESH_KEY)
-        }
+      try {
+        await axios.post('/api/v1/auth/token/refresh/', {}, { withCredentials: true })
+        return api(original)
+      } catch {
+        localStorage.removeItem(ACCESS_KEY)
+        localStorage.removeItem(REFRESH_KEY)
       }
     }
     return Promise.reject(error)

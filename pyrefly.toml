@@ -1,0 +1,7 @@
+project-includes = ["backend/**/*.py"]
+search-path = ["backend"]
+replace-untyped-imports-with-any = ["django.*", "rest_framework.*", "rest_framework_simplejwt.*", "django_filters.*"]
+
+[errors]
+untyped-import = false
+missing-attribute = false

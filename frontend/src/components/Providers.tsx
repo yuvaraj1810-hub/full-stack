@@ -1,7 +1,7 @@
 'use client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
-import { useThemeStore } from '@/lib/store'
+import { useEffect } from 'react'
+import { useAuthStore, useThemeStore } from '@/lib/store'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -11,6 +11,11 @@ const queryClient = new QueryClient({
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const { theme } = useThemeStore()
+  const loadUser = useAuthStore((s) => s.loadUser)
+
+  useEffect(() => {
+    loadUser()
+  }, [loadUser])
 
   useEffect(() => {
     const root = document.documentElement

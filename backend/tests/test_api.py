@@ -10,6 +10,14 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
+@pytest.fixture(autouse=True)
+def clear_throttle_cache():
+    from django.core.cache import cache
+    cache.clear()
+    yield
+    cache.clear()
+
+
 @pytest.fixture
 def api_client():
     return APIClient()
@@ -437,3 +445,148 @@ def test_gmail_signup_persists_and_login_fetches_from_db():
     assert me_res.status_code == 200
     assert me_res.data['email'] == 'testuser.one@gmail.com'
     assert me_res.data['username'] == 'testgmailuser'
+
+
+@pytest.mark.django_db
+def test_httponly_cookie_session_refresh_and_logout():
+    """Login sets HttpOnly cookies; /auth/me/ & /auth/token/refresh/ work via cookies; logout clears them."""
+    from django.conf import settings
+    from django.core.cache import cache
+    cache.clear()
+
+    User.objects.create_user(
+        username='cookieuser',
+        email='cookie.user@gmail.com',
+        password='StrongPass@123',
+        first_name='Cookie',
+        last_name='User',
+    )
+
+    client = APIClient()
+    login_res = client.post('/api/v1/auth/login/', {
+        'email': 'cookie.user@gmail.com',
+        'password': 'StrongPass@123',
+    }, format='json')
+    assert login_res.status_code == 200
+    assert settings.AUTH_COOKIE_ACCESS in login_res.cookies
+    assert settings.AUTH_COOKIE_REFRESH in login_res.cookies
+    assert login_res.cookies[settings.AUTH_COOKIE_ACCESS]['httponly'] is True
+    assert login_res.cookies[settings.AUTH_COOKIE_REFRESH]['httponly'] is True
+
+    # Simulate browser refresh: no Authorization header, only cookies
+    me_res = client.get('/api/v1/auth/me/')
+    assert me_res.status_code == 200
+    assert me_res.data['email'] == 'cookie.user@gmail.com'
+
+    # Refresh via HttpOnly cookie
+    refresh_res = client.post('/api/v1/auth/token/refresh/', {}, format='json')
+    assert refresh_res.status_code == 200
+    assert settings.AUTH_COOKIE_ACCESS in refresh_res.cookies
+
+    # Logout clears cookies and invalidates session
+    logout_res = client.post('/api/v1/auth/logout/', {}, format='json')
+    assert logout_res.status_code == 200
+    assert logout_res.cookies[settings.AUTH_COOKIE_ACCESS].value == ''
+    assert logout_res.cookies[settings.AUTH_COOKIE_REFRESH].value == ''
+
+
+@pytest.mark.django_db
+def test_forgot_and_reset_password_flow(mailoutbox):
+    """Forgot password emails signed reset link; reset password updates DB hash and allows login."""
+    import re
+    from django.core.cache import cache
+    cache.clear()
+
+    user = User.objects.create_user(
+        username='resetuser',
+        email='reset.user@gmail.com',
+        password='OldPassword@123',
+        first_name='Reset',
+        last_name='User',
+    )
+
+    client = APIClient()
+    fp_res = client.post('/api/v1/auth/forgot-password/', {
+        'email': 'Reset.User@gmail.com',
+    }, format='json')
+    assert fp_res.status_code == 200
+    assert len(mailoutbox) == 1
+
+    body = mailoutbox[0].body
+    match = re.search(r'uid=([^&\s]+)&token=([^\s]+)', body)
+    assert match is not None
+    uid, token = match.group(1), match.group(2)
+
+    reset_res = client.post('/api/v1/auth/reset-password/', {
+        'uid': uid,
+        'token': token,
+        'new_password': 'NewStrongPass@456',
+        'confirm_password': 'NewStrongPass@456',
+    }, format='json')
+    assert reset_res.status_code == 200
+
+    # Old password fails, new password succeeds
+    old_login = client.post('/api/v1/auth/login/', {
+        'email': 'reset.user@gmail.com',
+        'password': 'OldPassword@123',
+    }, format='json')
+    assert old_login.status_code == 401
+
+    new_login = client.post('/api/v1/auth/login/', {
+        'email': 'reset.user@gmail.com',
+        'password': 'NewStrongPass@456',
+    }, format='json')
+    assert new_login.status_code == 200
+    user.refresh_from_db()
+    assert user.check_password('NewStrongPass@456')
+
+
+@pytest.mark.django_db
+def test_admin_dashboard_access_control():
+    """Only authorized staff/superusers can access the admin dashboard."""
+    from django.core.cache import cache
+    cache.clear()
+
+    User.objects.create_user(
+        username='regularcust',
+        email='regular.cust@gmail.com',
+        password='StrongPass@123',
+    )
+    User.objects.create_superuser(
+        username='superadmin',
+        email='super.admin@gmail.com',
+        password='SuperPass@123',
+    )
+
+    cust_client = APIClient()
+    cust_client.post('/api/v1/auth/login/', {
+        'email': 'regular.cust@gmail.com',
+        'password': 'StrongPass@123',
+    }, format='json')
+    assert cust_client.get('/api/v1/admin/dashboard/').status_code == 403
+
+    admin_client = APIClient()
+    admin_client.post('/api/v1/auth/login/', {
+        'email': 'super.admin@gmail.com',
+        'password': 'SuperPass@123',
+    }, format='json')
+    assert admin_client.get('/api/v1/admin/dashboard/').status_code == 200
+
+
+@pytest.mark.django_db
+def test_login_rate_limiting():
+    """Repeated failed login attempts trigger 429 rate limiting."""
+    from django.core.cache import cache
+    cache.clear()
+
+    client = APIClient()
+    statuses = []
+    for _ in range(12):
+        res = client.post('/api/v1/auth/login/', {
+            'email': 'nobody@gmail.com',
+            'password': 'WrongPassword@123',
+        }, format='json')
+        statuses.append(res.status_code)
+
+    assert 429 in statuses
+    cache.clear()

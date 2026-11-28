@@ -24,8 +24,10 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true })
         try {
           const { data } = await api.post('/auth/login/', { email, password })
-          localStorage.setItem('access_token', data.access)
-          localStorage.setItem('refresh_token', data.refresh)
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('access_token')
+            localStorage.removeItem('refresh_token')
+          }
           set({ user: data.user, isAuthenticated: true, isLoading: false })
         } catch (err) {
           set({ isLoading: false })
@@ -46,21 +48,16 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
-        const refresh = typeof window !== 'undefined' ? localStorage.getItem('refresh_token') : null
         if (typeof window !== 'undefined') {
           localStorage.removeItem('access_token')
           localStorage.removeItem('refresh_token')
         }
         set({ user: null, isAuthenticated: false })
         useCartStore.setState({ cart: null })
-        if (refresh) {
-          api.post('/auth/logout/', { refresh }).catch(() => {})
-        }
+        await api.post('/auth/logout/', {}).catch(() => {})
       },
 
       loadUser: async () => {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
-        if (!token) return
         try {
           const { data } = await api.get('/auth/me/')
           set({ user: data, isAuthenticated: true })
