@@ -12,7 +12,11 @@ SECRET_KEY = config('DJANGO_SECRET_KEY')
 
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,backend').split(',')
+ALLOWED_HOSTS = [
+    h.strip()
+    for h in config('ALLOWED_HOSTS', default='localhost,127.0.0.1,backend').split(',')
+    if h.strip()
+]
 # Always include localhost/127.0.0.1 for Docker health-checks and internal probes
 _extra_hosts = ['localhost', '127.0.0.1', 'backend']
 for _h in _extra_hosts:

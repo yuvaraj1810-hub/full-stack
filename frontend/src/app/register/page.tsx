@@ -110,17 +110,26 @@ function RegisterForm() {
     } catch (err: any) {
       const respData = err.response?.data
       if (typeof respData === 'object' && respData !== null) {
+        const keyMap: Record<string, string> = {
+          confirm_password: 'confirmPassword',
+          first_name: 'firstName',
+          last_name: 'lastName',
+        }
         const extracted: Record<string, string> = {}
         for (const [key, val] of Object.entries(respData)) {
-          if (Array.isArray(val)) extracted[key] = val.join(' ')
-          else if (typeof val === 'string') extracted[key] = val
+          const mappedKey = keyMap[key] || key
+          if (Array.isArray(val)) extracted[mappedKey] = val.join(' ')
+          else if (typeof val === 'string') extracted[mappedKey] = val
         }
         setFieldErrors(extracted)
-        if (extracted.detail || extracted.message || extracted.non_field_errors) {
-          setGeneralError(extracted.detail || extracted.message || extracted.non_field_errors)
-        } else {
-          setGeneralError('Please correct the highlighted fields.')
-        }
+        const topMsg =
+          extracted.detail ||
+          extracted.message ||
+          extracted.non_field_errors ||
+          Object.values(extracted)[0] ||
+          'Please correct the highlighted fields.'
+        setGeneralError(topMsg)
+        toast.error(topMsg)
       } else {
         const status = err.response?.status
         const msg = status
